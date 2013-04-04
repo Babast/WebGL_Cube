@@ -5,11 +5,14 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     </head>
     <body>
+        <div>
+           <input type="button" value="Rotation caméra" onclick="RotationCam()">
+       </div>
        <script type="text/javascript" src="js/libs/three.js-r53/three.min.js"></script>
-       
        <script>
             var camera, scene, renderer;
-                        
+            var rotation;
+            
              init();
              animate();
              
@@ -22,17 +25,30 @@
 		camera.position.z = 400;
 
 		scene = new THREE.Scene();
-
+                
+                //Grid
+                var line_material = new THREE.LineBasicMaterial( { color: 0x303030 } ),
+                        geometry = new THREE.Geometry(),
+                        floor = -100, step = 25;
+                for ( var i = 0; i <= 40; i ++ ) {
+                    geometry.vertices.push( new THREE.Vector3( - 500, floor, i * step - 500 ) );
+                    geometry.vertices.push( new THREE.Vector3(   500, floor, i * step - 500 ) );
+                    geometry.vertices.push( new THREE.Vector3( i * step - 500, floor, -500 ) );
+                    geometry.vertices.push( new THREE.Vector3( i * step - 500, floor,  500 ) );
+                }
+                var line = new THREE.Line( geometry, line_material, THREE.LinePieces );
+                scene.add( line );
+                                
+                //Cube
 		var geometry = new THREE.CubeGeometry( 200, 200, 200 );
-
 		var texture = THREE.ImageUtils.loadTexture( 'crate.gif' );
 		texture.anisotropy = renderer.getMaxAnisotropy();
-
 		var material = new THREE.MeshBasicMaterial( { map: texture } );
-
 		mesh = new THREE.Mesh( geometry, material );
 		scene.add( mesh );
-            
+
+                rotation = true;
+                
 		window.addEventListener( 'resize', onWindowResize, false );
                 window.addEventListener( 'click', onWindowClick );
              }
@@ -44,18 +60,31 @@
             }
             
             function onWindowClick() {
-                camera.position.z -= 10;
+                //mesh.rotation.x += 0.01;
+	        //mesh.rotation.y += 0.01; 
             }
             
             function animate() {
                 requestAnimationFrame( animate );
-
-		mesh.rotation.x += 0.01;
-	        mesh.rotation.y += 0.01;             
-
-		renderer.render(scene, camera);
+                if (rotation){
+                    var timer = 0.0001 * Date.now();
+                    camera.position.x = Math.cos( timer ) * 500;
+                    camera.position.z = Math.sin( timer ) * 500;
+                    camera.lookAt( scene.position );
+                }
+                renderer.render(scene, camera);
+            }
+            
+            function RotationCam() {
+                if(rotation){
+                    rotation = false;
+                }
+                else{
+                    rotation =true;
+                }
             }
             
        </script>
+
     </body>
 </html>
